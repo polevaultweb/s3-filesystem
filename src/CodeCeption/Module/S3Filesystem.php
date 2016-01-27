@@ -3,6 +3,11 @@ namespace Codeception\Module;
 
 use Aws\S3\S3Client;
 
+/**
+ * Class S3Filesystem
+ *
+ * @package Codeception\Module
+ */
 class S3Filesystem extends Filesystem {
 
 	/**
