@@ -18,7 +18,7 @@ After that  follow the configuration instructions below.
 
 ### S3Filesystem configuration
 S3Filesystem extends `Filesystem` module hence any parameter required and available to that module is required and available in `S3Filesystem` as well.  
-In the suite `.yml` configuration file add the module among the loaded ones
+In the suite `.yml` configuration file add the module among the loaded ones:
 
 ```yml
   modules:
@@ -29,3 +29,12 @@ In the suite `.yml` configuration file add the module among the loaded ones
               accessKey: xxxxxxxxxxxx
               accessSecret: xxxxxxxxxxxxxxxxxxxxxxxx
 ``` 
+
+The module currently supports methods
+
+* doesBucketExist
+* deleteBucket
+
+And assertions
+
+* seeBucket

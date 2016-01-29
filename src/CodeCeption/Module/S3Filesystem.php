@@ -40,11 +40,45 @@ class S3Filesystem extends Filesystem {
 	}
 
 	/**
-	 * Delete a Bucket
+	 * Checks if a bucket exists
+	 *
+	 * @param string $bucket
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 *
+	 * @return bool
+	 */
+	public function doesBucketExist( $bucket ) {
+		try {
+			return $this->client->doesBucketExist( $bucket );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Asserts if a bucket exists
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 *
+	 * @param string $bucket
+	 */
+	public function seeBucket( $bucket ) {
+		$this->assertTrue( $this->doesBucketExist( $bucket ) );
+	}
+
+	/**
+	 * Delete a bucket
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 *
 	 * @param string $bucket
 	 */
 	public function deleteBucket( $bucket ) {
-		$this->client->deleteBucket( array( 'Bucket' => $bucket ) );
+		try {
+			$this->client->deleteBucket( array( 'Bucket' => $bucket ) );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
 	}
 }
