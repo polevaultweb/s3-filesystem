@@ -30,11 +30,23 @@ In the suite `.yml` configuration file add the module among the loaded ones:
               accessSecret: xxxxxxxxxxxxxxxxxxxxxxxx
 ``` 
 
-The module currently supports methods
+### Supports
 
 * doesBucketExist
 * deleteBucket
+* getBucketLocation
 
 And assertions
 
 * seeBucket
+* seeBucketLocation
+
+### Usage
+
+```php
+$I = new AcceptanceTester( $scenario );
+
+$I->setRegion( 'eu-west-1' );
+$this->actor->seeBucketLocation( 'eu-west-1', $bucket_name );
+```
+

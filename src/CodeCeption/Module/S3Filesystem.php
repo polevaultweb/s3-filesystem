@@ -18,25 +18,46 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * @va
 	 */
-	protected $client;
+	protected static $clients;
+
+	/**
+	 * @var string
+	 */
+	protected $region = 'us-east-1';
 
 	/**
 	 * Initialize the S3 client
 	 */
 	public function _initialize() {
 		parent::_initialize();
+	}
 
-		$args = array(
-			'version'     => isset( $this->config['version'] ) ? $this->config['version'] : 'latest',
-			'region'      => isset( $this->config['region'] ) ? $this->config['region'] : 'us-east-1',
-			'signature'   => isset( $this->config['signature'] ) ? $this->config['signature'] : 'v4',
-			'credentials' => array(
-				'key'    => $this->config['accessKey'],
-				'secret' => $this->config['accessSecret'],
-			),
-		);
+	/**
+	 * @param string $region
+	 */
+	public function setRegion( $region = 'us-east-1' ) {
+		$this->region = $region;
+	}
 
-		$this->client = new S3Client( $args );
+	/**
+	 * @return mixed
+	 */
+	protected function getClient() {
+		if ( ! isset( self::$clients[ $this->region ] ) ) {
+			$args = array(
+				'version'     => isset( $this->config['version'] ) ? $this->config['version'] : 'latest',
+				'region'      => $this->region,
+				'signature'   => isset( $this->config['signature'] ) ? $this->config['signature'] : 'v4',
+				'credentials' => array(
+					'key'    => $this->config['accessKey'],
+					'secret' => $this->config['accessSecret'],
+				),
+			);
+
+			self::$clients[ $this->region ] = new S3Client( $args );
+		}
+
+		return self::$clients[ $this->region ];
 	}
 
 	/**
@@ -50,7 +71,7 @@ class S3Filesystem extends Filesystem {
 	 */
 	public function doesBucketExist( $bucket ) {
 		try {
-			return $this->client->doesBucketExist( $bucket );
+			return $this->getClient()->doesBucketExist( $bucket );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -76,9 +97,40 @@ class S3Filesystem extends Filesystem {
 	 */
 	public function deleteBucket( $bucket ) {
 		try {
-			$this->client->deleteBucket( array( 'Bucket' => $bucket ) );
+			$this->getClient()->deleteBucket( array( 'Bucket' => $bucket ) );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Get the region of the bucket
+	 *
+	 * @param $bucket
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 *
+	 * @return mixed
+	 */
+	public function getBucketLocation( $bucket ) {
+		try {
+			$location = $this->getClient()->getBucketLocation( array( 'Bucket' => $bucket ) );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
+
+		return $location->get( 'LocationConstraint' );
+	}
+
+	/**
+	 * Assert a bucket has the correct region
+	 *
+	 * @param string $location
+	 * @param string $bucket
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 */
+	public function seeBucketLocation( $location, $bucket ) {
+		$this->assertEquals( $location, $this->getBucketLocation( $bucket ) );
 	}
 }
