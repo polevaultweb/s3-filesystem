@@ -47,6 +47,6 @@ And assertions
 $I = new AcceptanceTester( $scenario );
 
 $I->setRegion( 'eu-west-1' );
-$this->actor->seeBucketLocation( 'eu-west-1', $bucket_name );
+$I->seeBucketLocation( 'eu-west-1', $bucket_name );
 ```
 
