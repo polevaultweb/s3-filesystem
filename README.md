@@ -50,7 +50,7 @@ $I = new AcceptanceTester( $scenario );
 
 $I->setBucket( 'my-bucket' );
 $I->seeFile( 'path/to/file.jpg' );
-$I->seeBucketLocation( 'eu-west-1', $bucket_name );
+$I->seeBucketLocation( 'eu-west-1' );
 ```
 
 Or for single uses you can chain like so:
