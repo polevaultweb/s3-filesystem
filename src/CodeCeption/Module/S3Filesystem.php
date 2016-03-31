@@ -16,9 +16,14 @@ class S3Filesystem extends Filesystem {
 	protected $requiredFields = array( 'accessKey', 'accessSecret' );
 
 	/**
-	 * @va
+	 * @var array
 	 */
 	protected static $clients;
+
+	/**
+	 * @var string
+	 */
+	protected $bucket;
 
 	/**
 	 * @var string
@@ -33,6 +38,24 @@ class S3Filesystem extends Filesystem {
 	}
 
 	/**
+	 * Set the bucket used in the methods
+	 *
+	 * @param string $bucket
+	 *
+	 * @return S3Filesystem $this
+	 */
+	public function setBucket( $bucket ) {
+		$this->bucket = $bucket;
+
+		$region = $this->getBucketLocation();
+		$this->setRegion( $region );
+
+		return $this;
+	}
+
+	/**
+	 * Set the region used of the bucket
+	 *
 	 * @param string $region
 	 */
 	public function setRegion( $region = 'us-east-1' ) {
@@ -63,15 +86,13 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * Checks if a bucket exists
 	 *
-	 * @param string $bucket
-	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 *
 	 * @return bool
 	 */
-	public function doesBucketExist( $bucket ) {
+	public function doesBucketExist() {
 		try {
-			return $this->getClient()->doesBucketExist( $bucket );
+			return $this->getClient()->doesBucketExist( $this->bucket );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -81,23 +102,19 @@ class S3Filesystem extends Filesystem {
 	 * Asserts if a bucket exists
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
-	 * @param string $bucket
 	 */
-	public function seeBucket( $bucket ) {
-		$this->assertTrue( $this->doesBucketExist( $bucket ) );
+	public function seeBucket() {
+		$this->assertTrue( $this->doesBucketExist() );
 	}
 
 	/**
 	 * Delete a bucket
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
-	 * @param string $bucket
 	 */
-	public function deleteBucket( $bucket ) {
+	public function deleteBucket() {
 		try {
-			$this->getClient()->deleteBucket( array( 'Bucket' => $bucket ) );
+			$this->getClient()->deleteBucket( array( 'Bucket' => $this->bucket ) );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -106,15 +123,13 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * Get the region of the bucket
 	 *
-	 * @param $bucket
-	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 *
 	 * @return mixed
 	 */
-	public function getBucketLocation( $bucket ) {
+	public function getBucketLocation() {
 		try {
-			$location = $this->getClient()->getBucketLocation( array( 'Bucket' => $bucket ) );
+			$location = $this->getClient()->getBucketLocation( array( 'Bucket' => $this->bucket ) );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -126,27 +141,25 @@ class S3Filesystem extends Filesystem {
 	 * Assert a bucket has the correct region
 	 *
 	 * @param string $location
-	 * @param string $bucket
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 */
-	public function seeBucketLocation( $location, $bucket ) {
-		$this->assertEquals( $location, $this->getBucketLocation( $bucket ) );
+	public function seeBucketLocation( $location ) {
+		$this->assertEquals( $location, $this->getBucketLocation() );
 	}
 
 	/**
 	 * Checks if a file exists
 	 *
-	 * @param string $bucket
 	 * @param string $key
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 *
 	 * @return bool
 	 */
-	public function doesFileExist( $bucket, $key ) {
+	public function doesFileExist( $key ) {
 		try {
-			return $this->getClient()->doesObjectExist( $bucket, $key );
+			return $this->getClient()->doesObjectExist( $this->bucket, $key );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -157,10 +170,9 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 *
-	 * @param string $bucket
 	 * @param string $key
 	 */
-	public function seeFile( $bucket, $key ) {
-		$this->assertTrue( $this->doesFileExist( $bucket, $key ) );
+	public function seeFile( $key ) {
+		$this->assertTrue( $this->doesFileExist( $key ) );
 	}
 }

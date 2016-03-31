@@ -48,9 +48,17 @@ And assertions
 ```php
 $I = new AcceptanceTester( $scenario );
 
-$I->seeFile( 'my-bucket', 'path/to/file.jpg' );
-
-$I->setRegion( 'eu-west-1' );
+$I->setBucket( 'my-bucket' );
+$I->seeFile( 'path/to/file.jpg' );
 $I->seeBucketLocation( 'eu-west-1', $bucket_name );
 ```
+
+Or for single uses you can chain like so:
+
+```php
+$I = new AcceptanceTester( $scenario );
+
+$I->setBucket( 'my-bucket' )->seeFile( 'path/to/file.jpg' );
+```
+
 
