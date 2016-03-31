@@ -133,4 +133,34 @@ class S3Filesystem extends Filesystem {
 	public function seeBucketLocation( $location, $bucket ) {
 		$this->assertEquals( $location, $this->getBucketLocation( $bucket ) );
 	}
+
+	/**
+	 * Checks if a file exists
+	 *
+	 * @param string $bucket
+	 * @param string $key
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 *
+	 * @return bool
+	 */
+	public function doesFileExist( $bucket, $key ) {
+		try {
+			return $this->getClient()->doesObjectExist( $bucket, $key );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Asserts if a file exists
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 *
+	 * @param string $bucket
+	 * @param string $key
+	 */
+	public function seeFile( $bucket, $key ) {
+		$this->assertTrue( $this->doesFileExist( $bucket, $key ) );
+	}
 }
