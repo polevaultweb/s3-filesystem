@@ -32,12 +32,14 @@ In the suite `.yml` configuration file add the module among the loaded ones:
 
 ### Supports
 
+* doesFileExist
 * doesBucketExist
 * deleteBucket
 * getBucketLocation
 
 And assertions
 
+* seeFile
 * seeBucket
 * seeBucketLocation
 
@@ -45,6 +47,8 @@ And assertions
 
 ```php
 $I = new AcceptanceTester( $scenario );
+
+$I->seeFile( 'my-bucket', 'path/to/file.jpg' );
 
 $I->setRegion( 'eu-west-1' );
 $I->seeBucketLocation( 'eu-west-1', $bucket_name );
