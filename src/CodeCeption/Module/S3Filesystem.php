@@ -47,8 +47,12 @@ class S3Filesystem extends Filesystem {
 	public function setBucket( $bucket ) {
 		$this->bucket = $bucket;
 
-		$region = $this->getBucketLocation();
-		$this->setRegion( $region );
+		if ( $this->doesBucketExist() ) {
+			$region = $this->getBucketLocation();
+			$this->setRegion( $region );
+		} else {
+			$this->setRegion();
+		}
 
 		return $this;
 	}
