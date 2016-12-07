@@ -198,4 +198,19 @@ class S3Filesystem extends Filesystem {
 	public function seeFile( $key ) {
 		$this->assertTrue( $this->doesFileExist( $key ) );
 	}
+
+	/**
+	 * Delete a single file from the current bucket.
+	 *
+	 * @param string $key
+	 *
+	 * @return mixed
+	 */
+	public function deleteFile( $key ) {
+		try {
+			return $this->getClient()->deleteObject( array( 'Bucket' => $this->bucket, 'Key' => $key ) );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
+	}
 }
