@@ -112,6 +112,25 @@ class S3Filesystem extends Filesystem {
 	}
 
 	/**
+	 * Create a bucket
+	 *
+	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 */
+	public function createBucket() {
+		$args = array( 'Bucket' => $this->bucket );
+
+		if ( ! empty( $this->region ) ) {
+			$args['LocationConstraint'] = $this->region;
+		}
+
+		try {
+			$this->getClient()->createBucket( $args );
+		} catch ( \Exception $e ) {
+			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		}
+	}
+
+	/**
 	 * Delete a bucket
 	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
