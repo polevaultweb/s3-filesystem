@@ -2,6 +2,7 @@
 namespace Codeception\Module;
 
 use Aws\S3\S3Client;
+use Aws\S3\BatchDelete;
 
 /**
  * Class S3Filesystem
@@ -133,11 +134,24 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * Delete a bucket
 	 *
+	 * @param bool $force Optionally force bucket delete even if it is not empty.
+	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 */
-	public function deleteBucket() {
+	public function deleteBucket( $force = false ) {
 		try {
-			$this->getClient()->deleteBucket( array( 'Bucket' => $this->bucket ) );
+			$client = $this->getClient();
+
+			// Delete the objects in the bucket before attempting to delete the bucket.
+			if ( $force ) {
+				$delete = BatchDelete::fromListObjects( $client, array( 'Bucket' => $this->bucket ) );
+				$delete->delete();
+			}
+
+			$client->deleteBucket( array( 'Bucket' => $this->bucket ) );
+
+			// Wait until the bucket is not accessible.
+			$client->waitUntil( 'BucketNotExists', array( 'Bucket' => $this->bucket ) );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
@@ -153,11 +167,11 @@ class S3Filesystem extends Filesystem {
 	public function getBucketLocation() {
 		try {
 			$location = $this->getClient()->getBucketLocation( array( 'Bucket' => $this->bucket ) );
+
+			return $location->get( 'LocationConstraint' );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
-
-		return $location->get( 'LocationConstraint' );
 	}
 
 	/**
