@@ -11,15 +11,14 @@
   "license": "MIT",
   "authors": [
     {
-      "name": "polevaultweb (Iain Poulson)",
+      "name": "Iain Poulson",
       "email": "iain@polevaultweb.com",
-      "homepage": "http://polevaultweb.com",
-      "role": "Developer"
+      "homepage": "https://polevaultweb.com"
     }
   ],
   "require": {
     "php": ">=5.4.0",
-    "codeception/codeception": "~2.0",
+    "codeception/codeception": "^2.5 || ^3.0",
     "aws/aws-sdk-php": "3.*"
   },
   "autoload": {
