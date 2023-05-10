@@ -115,17 +115,42 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * Create a bucket
 	 *
+	 * @param bool $block False to allow public access and disable Enforce Object Ownership
+	 *
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 */
-	public function createBucket() {
-		$args = array( 'Bucket' => $this->bucket );
-
+	public function createBucket( $block = false ) {
+		$args      = array( 'Bucket' => $this->bucket );
 		if ( ! empty( $this->region ) ) {
 			$args['LocationConstraint'] = $this->region;
 		}
 
+		$bapaArgs = array(
+			'Bucket'                         => $this->bucket,
+			'PublicAccessBlockConfiguration' => array(
+				'BlockPublicAcls'       => $block,
+				'BlockPublicPolicy'     => $block,
+				'IgnorePublicAcls'      => $block,
+				'RestrictPublicBuckets' => $block,
+			),
+		);
+
+		$eooArgs = array(
+			'Bucket'            => $this->bucket,
+			'OwnershipControls' => array(
+				'Rules' => array(
+					array(
+						'ObjectOwnership' => $block ? 'BucketOwnerEnforced' : 'BucketOwnerPreferred',
+					),
+				),
+			),
+		);
+
 		try {
-			$this->getClient()->createBucket( $args );
+			$client = $this->getClient();
+			$client->createBucket( $args );
+			$client->putPublicAccessBlock( $bapaArgs );
+			$client->putBucketOwnershipControls( $eooArgs );
 		} catch ( \Exception $e ) {
 			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
 		}
