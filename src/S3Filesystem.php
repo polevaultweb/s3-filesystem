@@ -120,7 +120,7 @@ class S3Filesystem extends Filesystem {
 	 * @throws \PHPUnit_Framework_AssertionFailedError
 	 */
 	public function createBucket( $block = false ) {
-		$args      = array( 'Bucket' => $this->bucket );
+		$args = array( 'Bucket' => $this->bucket );
 		if ( ! empty( $this->region ) ) {
 			$args['LocationConstraint'] = $this->region;
 		}
