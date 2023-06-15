@@ -245,7 +245,7 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @return mixed
 	 */
-	public function deleteFile( $key ) {
+	public function deleteBucketFile( $key ) {
 		try {
 			return $this->getClient()->deleteObject( array( 'Bucket' => $this->bucket, 'Key' => $key ) );
 		} catch ( \Exception $e ) {
