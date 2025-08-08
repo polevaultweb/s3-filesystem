@@ -7,7 +7,7 @@
     "s3",
     "codeception"
   ],
-  "homepage": "http://github.com/polevaultweb/s3-filesystem",
+  "homepage": "https://github.com/polevaultweb/s3-filesystem",
   "license": "MIT",
   "authors": [
     {
@@ -17,7 +17,7 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
+    "php": ">=7.4.0",
     "codeception/codeception": "*",
     "aws/aws-sdk-php": "3.*"
   },
