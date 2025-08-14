@@ -1,8 +1,12 @@
 <?php
+
 namespace Codeception\Module;
 
 use Aws\S3\S3Client;
 use Aws\S3\BatchDelete;
+use Exception;
+use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Class S3Filesystem
@@ -14,22 +18,22 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * @var array
 	 */
-	protected $requiredFields = array( 'accessKey', 'accessSecret' );
+	protected array $requiredFields = array( 'accessKey', 'accessSecret' );
 
 	/**
 	 * @var array
 	 */
-	protected static $clients;
+	protected static array $clients;
 
 	/**
 	 * @var string
 	 */
-	protected $bucket;
+	protected string $bucket;
 
 	/**
 	 * @var string
 	 */
-	protected $region = 'us-east-1';
+	protected string $region = 'us-east-1';
 
 	/**
 	 * Initialize the S3 client
@@ -45,7 +49,7 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @return S3Filesystem $this
 	 */
-	public function setBucket( $bucket ) {
+	public function setBucket( string $bucket ): S3Filesystem {
 		$this->bucket = $bucket;
 
 		if ( $this->doesBucketExist() ) {
@@ -63,7 +67,7 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @param string $region
 	 */
-	public function setRegion( $region = 'us-east-1' ) {
+	public function setRegion( string $region = 'us-east-1' ) {
 		$this->region = $region;
 	}
 
@@ -73,9 +77,9 @@ class S3Filesystem extends Filesystem {
 	protected function getClient() {
 		if ( ! isset( self::$clients[ $this->region ] ) ) {
 			$args = array(
-				'version'     => isset( $this->config['version'] ) ? $this->config['version'] : 'latest',
+				'version'     => $this->config['version'] ?? 'latest',
 				'region'      => $this->region,
-				'signature'   => isset( $this->config['signature'] ) ? $this->config['signature'] : 'v4',
+				'signature'   => $this->config['signature'] ?? 'v4',
 				'credentials' => array(
 					'key'    => $this->config['accessKey'],
 					'secret' => $this->config['accessSecret'],
@@ -91,22 +95,21 @@ class S3Filesystem extends Filesystem {
 	/**
 	 * Checks if a bucket exists
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
 	 * @return bool
+	 * @throws
 	 */
-	public function doesBucketExist() {
+	public function doesBucketExist(): bool {
 		try {
 			return $this->getClient()->doesBucketExist( $this->bucket );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 
 	/**
 	 * Asserts if a bucket exists
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 * @throws AssertionFailedError
 	 */
 	public function seeBucket() {
 		$this->assertTrue( $this->doesBucketExist() );
@@ -117,9 +120,9 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @param bool $block False to allow public access and disable Enforce Object Ownership
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 * @throws AssertionFailedError
 	 */
-	public function createBucket( $block = false ) {
+	public function createBucket( bool $block = false ) {
 		$args = array( 'Bucket' => $this->bucket );
 		if ( ! empty( $this->region ) ) {
 			$args['LocationConstraint'] = $this->region;
@@ -151,8 +154,8 @@ class S3Filesystem extends Filesystem {
 			$client->createBucket( $args );
 			$client->putPublicAccessBlock( $bapaArgs );
 			$client->putBucketOwnershipControls( $eooArgs );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 
@@ -161,9 +164,9 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @param bool $force Optionally force bucket delete even if it is not empty.
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 * @throws AssertionFailedError
 	 */
-	public function deleteBucket( $force = false ) {
+	public function deleteBucket( bool $force = false ) {
 		try {
 			$client = $this->getClient();
 
@@ -177,25 +180,25 @@ class S3Filesystem extends Filesystem {
 
 			// Wait until the bucket is not accessible.
 			$client->waitUntil( 'BucketNotExists', array( 'Bucket' => $this->bucket ) );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 
 	/**
 	 * Get the region of the bucket
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
 	 * @return mixed
+	 * @throws AssertionFailedError
+	 *
 	 */
 	public function getBucketLocation() {
 		try {
 			$location = $this->getClient()->getBucketLocation( array( 'Bucket' => $this->bucket ) );
 
 			return $location->get( 'LocationConstraint' );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 
@@ -204,9 +207,9 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @param string $location
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
+	 * @throws AssertionFailedError
 	 */
-	public function seeBucketLocation( $location ) {
+	public function seeBucketLocation( string $location ) {
 		$this->assertEquals( $location, $this->getBucketLocation() );
 	}
 
@@ -215,41 +218,42 @@ class S3Filesystem extends Filesystem {
 	 *
 	 * @param string $key
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
 	 * @return bool
+	 * @throws AssertionFailedError
+	 *
 	 */
-	public function doesFileExist( $key ) {
+	public function doesFileExist( string $key ): bool {
 		try {
 			return $this->getClient()->doesObjectExist( $this->bucket, $key );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 
 	/**
 	 * Asserts if a file exists
 	 *
-	 * @throws \PHPUnit_Framework_AssertionFailedError
-	 *
 	 * @param string $key
+	 *
+	 * @throws AssertionFailedError
+	 *
 	 */
-	public function seeFile( $key ) {
+	public function seeFile( string $key ) {
 		$this->assertTrue( $this->doesFileExist( $key ) );
 	}
 
 	/**
 	 * Delete a single file from the current bucket.
 	 *
-	 * @param string $key
+	 * @param string $filename
 	 *
 	 * @return mixed
 	 */
-	public function deleteFile( $key ) {
+	public function deleteFile( string $filename ): void {
 		try {
-			return $this->getClient()->deleteObject( array( 'Bucket' => $this->bucket, 'Key' => $key ) );
-		} catch ( \Exception $e ) {
-			\PHPUnit_Framework_Assert::fail( $e->getMessage() );
+			$this->getClient()->deleteObject( array( 'Bucket' => $this->bucket, 'Key' => $filename ) );
+		} catch ( Exception $e ) {
+			Assert::fail( $e->getMessage() );
 		}
 	}
 }
